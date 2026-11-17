@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Comment History + Likes for Quetta",
+  "version": "1.2.0",
+  "description": "Quetta-compatible comment history and likes, using a locally stored YouTube Data API key.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://myactivity.google.com/*",
+    "https://www.googleapis.com/*"
+  ],
+  "action": {
+    "default_title": "YouTube Comments for Quetta"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://myactivity.google.com/*"
+      ],
+      "js": [
+        "logger.js",
+        "content-script.js"
+      ],
+      "run_at": "document_end"
+    }
+  ]
+}

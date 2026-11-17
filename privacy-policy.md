@@ -1,0 +1,3 @@
+# Privacy — Quetta port
+
+This extension scans YouTube comments on your signed-in Google My Activity webpage and stores the resulting comment records locally in the browser extension storage. Your supplied YouTube Data API key is stored only in that extension storage and sent directly to Google at `www.googleapis.com` with public comment/video identifiers to retrieve public like counts. There is no project-operated server or analytics. The extension does not post, modify, or delete YouTube content. Use **Remove** to clear the stored key; browser extension storage is not a hardware-backed vault. Restrict the key to YouTube Data API v3 and set quota limits in Google Cloud.
