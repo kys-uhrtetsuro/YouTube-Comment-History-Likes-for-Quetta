@@ -27,16 +27,33 @@
     u.searchParams.set("key",key);
     const r=await fetch(u,{headers:{Accept:"application/json"}});
     const body=await r.json().catch(()=>({}));
-    if(!r.ok)throw Error("YouTube API HTTP "+r.status+": "+(body?.error?.message||r.statusText));
+    if(!r.ok){
+      const err=new Error("YouTube API HTTP "+r.status+": "+(body?.error?.message||r.statusText));
+      err.status=r.status;
+      err.reason=body?.error?.errors?.[0]?.reason||body?.error?.status||"";
+      throw err;
+    }
     return body;
+  }
+  // 403 can mean quota or an invalid API key: those must remain visible failures.
+  function isBlockingError(e){
+    const reason=String(e?.reason||"").toLowerCase();
+    const message=String(e?.message||"").toLowerCase();
+    return /quota|rate.?limit|daily.?limit|accessnotconfigured|api.?key|keyinvalid|keyexpired|referer|not been used|not enabled|not allowed|project.?blocked|requests? (?:from|are) blocked|billing/i.test(reason+" "+message);
+  }
+  function isSkippable(e){
+    return (e?.status===403||e?.status===404) && !isBlockingError(e);
   }
   function norm(s){return String(s||"").normalize("NFKC").toLocaleLowerCase().replace(/\s+/g," ").trim();}
   async function byIds(ids,key){
     if(!ids.length)return [];
     try{return (await youtube("comments",{part:"snippet",id:ids.join(","),textFormat:"plainText"},key)).items||[];}
     catch(e){
-      if(/HTTP (400|404):/.test(e.message)){
-        if(ids.length===1)return [];
+      if(e?.status===400||isSkippable(e)){
+        if(ids.length===1){
+          console.info("[Quetta] Skip unavailable comment ID; HTTP",e.status);
+          return [];
+        }
         const n=ids.length>>>1;
         return [...await byIds(ids.slice(0,n),key),...await byIds(ids.slice(n),key)];
       }
@@ -51,7 +68,13 @@
     for(let i=0;i<10&&pending.size;i++){
       let body;
       try{body=await youtube("commentThreads",{part:"snippet,replies",videoId,maxResults:100,order:"time",textFormat:"plainText",pageToken:token},key);}
-      catch(e){if(/HTTP (403|404):/.test(e.message)&&/commentsDisabled|notFound|videoNotFound/i.test(e.message))break;throw e;}
+      catch(e){
+        if(isSkippable(e)){
+          console.info("[Quetta] Skip unavailable video:",videoId,"HTTP",e.status);
+          break;
+        }
+        throw e;
+      }
       for(const th of body.items||[]){
         const cand=[];
         const top=th?.snippet?.topLevelComment;

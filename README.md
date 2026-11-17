@@ -11,6 +11,11 @@ Android Quetta compatibility port of [SecuredByKC/YouTube-Comment-History-Plus-L
 5. Paste the key into the extension, tap **Save / Test**, then **Fetch Likes**.
 6. Sort the result by **Most Likes**.
 
+## Error handling (v1.2.1)
+- HTTP 403/404 for inaccessible comments or videos skips the affected item and continues.
+- API authentication, invalid-key, API-not-enabled and quota/rate-limit errors remain fatal, with an on-screen error.
+- Unretrieved likes display as **—**; genuine 0 likes display as **0**.
+
 ## Changes and limitations
 
 - Does not call unsupported `chrome.identity.getAuthToken`. Queries only public YouTube Data API endpoints using your own key.

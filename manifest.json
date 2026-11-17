@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Comment History + Likes for Quetta",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Quetta-compatible comment history and likes, using a locally stored YouTube Data API key.",
   "permissions": [
     "storage"
